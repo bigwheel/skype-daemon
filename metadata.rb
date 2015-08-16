@@ -1,0 +1,7 @@
+name             'skype-daemon'
+maintainer       'YOUR_NAME'
+maintainer_email 'YOUR_EMAIL'
+license          'All rights reserved'
+description      'Installs/Configures skype-daemon'
+long_description 'Installs/Configures skype-daemon'
+version          '0.1.0'
