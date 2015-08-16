@@ -1,6 +1,8 @@
 name             'skype-daemon'
 maintainer       'k.bigwheel'
 maintainer_email 'k.bigwheel+eng@gmail.com'
+source_url       'https://github.com/bigwheel/skype-daemon'
+issues_url       'https://github.com/bigwheel/skype-daemon/issues'
 license          'MIT License'
 description      'Installs/Configures skype-daemon'
 long_description 'Installs/Configures skype-daemon'

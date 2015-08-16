@@ -1,10 +1,10 @@
 # skype-daemon-cookbook
 
-TODO: Enter the cookbook description here.
+skype daemon for 3rd party API
 
 ## Supported Platforms
 
-TODO: List your supported platforms.
+Only ubuntu 15.04
 
 ## Attributes
 
@@ -13,13 +13,25 @@ TODO: List your supported platforms.
     <th>Key</th>
     <th>Type</th>
     <th>Description</th>
-    <th>Default</th>
+    <th>Required</th>
   </tr>
   <tr>
-    <td><tt>['skype-daemon']['bacon']</tt></td>
-    <td>Boolean</td>
-    <td>whether to include bacon</td>
-    <td><tt>true</tt></td>
+    <td><tt>['skype-daemon']['app-name']</tt></td>
+    <td>String</td>
+    <td>App name what wants to<br />use Skype 3rd party API.<br />e.g. 'Skype4Java'</td>
+    <td><tt>True</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['skype-daemon']['username']</tt></td>
+    <td>String</td>
+    <td>Skype username</td>
+    <td><tt>True</tt></td>
+  </tr>
+  <tr>
+    <td><tt>['skype-daemon']['password']</tt></td>
+    <td>String</td>
+    <td>Skype password(plain text)</td>
+    <td><tt>True</tt></td>
   </tr>
 </table>
 
@@ -39,4 +51,5 @@ Include `skype-daemon` in your node's `run_list`:
 
 ## License and Authors
 
-Author:: YOUR_NAME (<YOUR_EMAIL>)
+MIT License
+k.bigwheel(k.bigwheel+eng @ gmail.com)
