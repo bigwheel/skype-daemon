@@ -1,0 +1,107 @@
+#!/bin/bash
+
+if [ -r /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+    log_daemon_msg() {
+        msg=$1
+        prog=$2
+        echo -n $"$msg $prog: "
+    }
+    log_end_msg() {
+        if [ "$1" = "0" ]; then
+            success
+        elif [ "$1" = "1" ]; then
+            failure
+        fi
+        echo
+    }
+
+elif [ -r /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+else
+    echo "Could not find a helper script needed to run this script."
+    exit 1
+fi
+
+DAEMON_USER=skype
+PROGNAME=`basename $0`
+PIDFILE=/var/run/skype.pid
+XSERVERNUM=20
+XAUTHFILE=/home/skype/.Xauthority
+LOGFILE=/var/log/skype.log
+DBPATH=/home/skype/.Skype
+XAUTHPROTO=.
+SKYPE=/usr/bin/skype
+
+[ -f /etc/sysconfig/skype ] && . /etc/sysconfig/skype
+
+prog="skype"
+RETVAL=0
+
+dircheck() {
+    if [ ! -d `dirname "$1"` ]; then
+        echo "`dirname \"$1\"` does not exist"
+        return 1
+    else
+        return 0
+    fi
+}
+
+start() {
+    log_daemon_msg "Starting" "skype"
+    if ! dircheck "$LOGFILE" || ! dircheck "$XAUTHFILE" || [ -e "$PIDFILE" ]; then
+        log_end_msg 1
+        echo
+        RETVAL=1
+        return
+    fi
+    if [ ! -f $LOGFILE ] ; then
+        touch $LOGFILE
+        chown $DAEMON_USER: $LOGFILE
+    fi
+
+    MCOOKIE=`mcookie` && \
+    sudo -H -u "$DAEMON_USER" env XAUTHORITY=$XAUTHFILE sh -c "xauth add \":$XSERVERNUM\" \"$XAUTHPROTO\" \"$MCOOKIE\" >> \"$LOGFILE\" 2>&1" && \
+    sudo -H -u "$DAEMON_USER" sh -c "Xvfb :$XSERVERNUM -auth $XAUTHFILE -screen 0 800x600x8 -nolisten tcp >> \"$LOGFILE\" 2>&1 & echo \$!" >"$PIDFILE" &&
+    sleep 3 && \
+    (sudo -H -u "$DAEMON_USER" env DISPLAY=:$XSERVERNUM XAUTHORITY=$XAUTHFILE SKYPE="$SKYPE" sh -c "echo \"<%= node['skype-daemon']['username'] %> <%= node['skype-daemon']['password'] %>\" | nohup \"$SKYPE\" --dbpath=\"$DBPATH\" --pipelogin &") >> "$LOGFILE" 2>&1 && \
+    # (sudo -H -u "$DAEMON_USER" env DISPLAY=:$XSERVERNUM XAUTHORITY=$XAUTHFILE SKYPE="$SKYPE" sh -c "nohup \"$SKYPE\" --dbpath=\"$DBPATH\" &") >> "$LOGFILE" 2>&1 && \
+    (log_end_msg 0 && [ -d /var/lock/subsys ] && touch /var/lock/subsys/skype || true) \
+        || (RETVAL=$?; kill -TERM `cat $PIDFILE`; log_end_msg 1)
+}
+
+stop() {
+    log_daemon_msg "Stopping" "skype"
+    if [ -e "$PIDFILE" ]; then
+        kill -TERM `cat $PIDFILE` && \
+        rm -f $PIDFILE && \
+        if [ -d /var/lock/subsys ]; then rm -f /var/lock/subsys/skype; fi && \
+        log_end_msg 0 || log_end_msg 1
+    else
+        log_end_msg 1
+        RETVAL=1
+    fi
+}
+
+usage() {
+    echo "Usage: $PROGNAME {start|stop|restart}"
+}
+
+case $1 in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        usage
+        RETVAL=255
+        ;;
+esac
+
+exit $RETVAL

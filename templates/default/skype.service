@@ -1,0 +1,12 @@
+[Unit]
+Description=Servicized Skype
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/systemd/scripts/skype.sh start
+ExecStop=/usr/lib/systemd/scripts/skype.sh stop
+
+[Install]
+WantedBy=multi-user.target
